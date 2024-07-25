@@ -76,10 +76,10 @@ if __name__ == '__main__':
     wbtc = coin_impl.at(wbtc_address)
     wbtc.transfer(borrower, collateral_amount, sender="0x5Ee5bf7ae06D1Be5997A1A72006FE6C607eC6DE8")  # AAVE
 
-    max_borrowable = controller.max_borrowable(10**8, 30)
+    max_borrowable = controller.max_borrowable(collateral_amount, 30)
     with boa.env.prank(borrower):
-        wbtc.approve(controller, 10**8)
-        controller.create_loan(10**8, max_borrowable, 30)
+        wbtc.approve(controller, collateral_amount)
+        controller.create_loan(collateral_amount, max_borrowable, 30)
 
     # --- Dump and trade ---
 
@@ -111,7 +111,7 @@ if __name__ == '__main__':
             i, j = j, i  # WBTC in and crvUSD out
 
         amm.exchange(i, j, trade_amount, 0, sender=trader)
-        print("Health:", controller.health(borrower) / 10 ** 16, "%")
+        print("Borrower health:", controller.health(borrower) / 10 ** 16, "%")
 
     # --- Liquidate ---
 
