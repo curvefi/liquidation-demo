@@ -117,7 +117,7 @@ if __name__ == '__main__':
 
     curve_router_impl = boa.load_abi("interfaces/CurveRouter.json", name="CurveRouterMock")
     curve_router = curve_router_impl.at(CURVE_ROUTER)
-    hard_liquidator = boa.load("contracts/HardLiquidatorRouter.vy", CURVE_ROUTER)
+    hard_liquidator = boa.load("contracts/HardLiquidatorCurveRouter.vy", CURVE_ROUTER)
 
     state_wbtc, state_crvusd, debt, N = controller.user_state(borrower)
     tokens_to_liquidate = debt - state_crvusd
