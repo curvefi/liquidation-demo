@@ -14,9 +14,6 @@ interface Controller:
     def collateral_token() -> ERC20: view
     def borrowed_token() -> ERC20: view
 
-interface CryptoPool:
-    def exchange(i: uint256, j: uint256, dx: uint256, min_dy: uint256): nonpayable
-
 
 ROUTER: immutable(address)
 
