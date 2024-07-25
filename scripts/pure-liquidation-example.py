@@ -91,16 +91,15 @@ if __name__ == '__main__':
         wbtc.approve(amm, 2**256 - 1)
 
     [p_up, p_down] = controller.user_prices(borrower)
-    p_mid = (p_up + p_down) // 2
     p_o = 65_000 * 10**18
 
     while controller.health(borrower) > 0:
-        if p_o == p_mid:
-            p_o = p_o * 20 // 19
-        elif p_o * 19 // 20 < p_mid:
-            p_o = p_mid
+        if p_o == p_down:
+            p_o = p_o * 100 // 99
+        elif p_o * 99 // 100 < p_down:
+            p_o = p_down
         else:
-            p_o = p_o * 19 // 20
+            p_o = p_o * 99 // 100
 
         price_oracle.set_price(p_o, sender=admin)
         boa.env.time_travel(seconds=600)
@@ -121,20 +120,12 @@ if __name__ == '__main__':
 
     state_wbtc, state_crvusd, debt, N = controller.user_state(borrower)
     tokens_to_liquidate = debt - state_crvusd
-    wbtc_required = curve_router.get_dx(SWAP_DATA["route"], SWAP_DATA["swap_params"], tokens_to_liquidate, SWAP_DATA["pools"])
-    wbtc_to_sell = wbtc_required * 100 // 99
-    expected = curve_router.get_dy(SWAP_DATA["route"], SWAP_DATA["swap_params"], wbtc_to_sell)
-    calldata = curve_router.exchange.prepare_calldata(SWAP_DATA["route"], SWAP_DATA["swap_params"], wbtc_to_sell, expected * 999 // 1000)
 
     print(f"\nUnhealthy user state: {state_wbtc / 10**8} WTBC, {state_crvusd / 10**18} crvUSD, {debt / 10**18} debt")
-    print(f"Tokens to liquidate: {tokens_to_liquidate / 10**18} crvUSD")
-    print(f"WBTC to sell: {wbtc_to_sell / 10**8} WBTC")
-    print(f"Expected: {expected / 10 ** 18} crvUSD")
     print(f"Liquidator balances: {wbtc.balanceOf(liquidator) / 10 ** 8} WBTC, {crvusd.balanceOf(liquidator) / 10 ** 18} crvUSD")
 
-    # frac = 10**18 (100 %), full liquidation
-    hard_liquidator.liquidate(borrower, state_crvusd * 999 // 1000, 10**18, controller, calldata, sender=liquidator)
-    print("\nFULL LIQUIDATION HAPPENED!!!\n")
+    controller.liquidate(borrower, state_crvusd * 999 // 1000, sender=liquidator)
+    print("\nPURE LIQUIDATION HAPPENED!!!\n")
 
     state_wbtc, state_crvusd, debt, N = controller.user_state(borrower)
 
